@@ -362,11 +362,6 @@
       blueButtonUsed = true;
       const blueButton = document.getElementById('blueButton');
       
-      // Disable and change the button immediately
-      blueButton.textContent = 'oops...';
-      blueButton.classList.add('disabled');
-      blueButton.onclick = null; // Remove click handler
-      
       const gif = document.getElementById('blueGif');
       const audio = document.getElementById('bigFireAudio');
 
@@ -375,8 +370,13 @@
       audio.volume = 1.0;
       audio.play();
 
-      // Wait 0.5s before doing the rest
+      // Wait 0.5s before changing button and doing the rest
       setTimeout(() => {
+        // Change button to "oops..." and disable it
+        blueButton.textContent = 'oops...';
+        blueButton.classList.add('disabled');
+        blueButton.onclick = null; // Remove click handler
+        
         explodeAllDarcys();
         document.body.classList.add('blue-theme');
         document.querySelector('.title').classList.add('white-text');
