@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Happy Birthday Darcy!</title>
   <link rel="icon" type="image/png" href="assets/darcy4.png">
-  
-  <!-- Preload all assets -->
+
+  <!-- Preload assets -->
   <link rel="preload" href="assets/darcy1.png" as="image">
   <link rel="preload" href="assets/darcy2.png" as="image">
   <link rel="preload" href="assets/darcy3.png" as="image">
@@ -20,13 +20,20 @@
   <link rel="preload" href="assets/bigfire.mp3" as="audio" type="audio/mpeg">
 
   <style>
-    body {
+    html, body {
       margin: 0;
       padding: 0;
-      min-height: 100vh;
-      background: white;
-      font-family: Arial, sans-serif;
+      height: 100%;
       overflow: hidden;
+    }
+
+    body.loading *:not(#loadingScreen) {
+      display: none !important;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: white;
       position: relative;
       transition: background-color 0.5s ease;
     }
@@ -36,26 +43,17 @@
     }
 
     #loadingScreen {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: auto;
-  height: auto;
-  background: white;
-  z-index: 10000;
-  padding: 10px 20px;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: black;
-  transition: opacity 0.5s ease;
-  border-bottom-left-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-
-    #loadingScreen.fade-out {
-      opacity: 0;
-      pointer-events: none;
+      position: fixed;
+      top: 0;
+      right: 0;
+      padding: 10px 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: black;
+      background: white;
+      z-index: 10000;
+      border-bottom-left-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
 
     .fire-video {
@@ -179,7 +177,6 @@
     .sincere-message {
       font-size: 1.2rem;
       color: black;
-      text-align: left;
       max-width: 500px;
       line-height: 1.5;
       padding: 20px;
@@ -232,15 +229,16 @@
     }
   </style>
 </head>
-<body>
+<body class="loading">
+
   <div id="loadingScreen">Loading…</div>
 
   <video class="fire-video" id="fireVideo" autoplay muted loop preload="auto">
     <source src="assets/fire.mp4" type="video/mp4" />
-    Your browser does not support the video tag.
   </video>
 
   <img id="blueGif" src="assets/makeitblue.gif" />
+
   <audio id="smallFireAudio" src="assets/smallfire.mp3" preload="auto"></audio>
   <audio id="bigFireAudio" src="assets/bigfire.mp3" preload="auto"></audio>
 
@@ -316,7 +314,7 @@
 
     function explodeAllDarcys() {
       if (darcys.length === 0) return;
-      
+
       document.getElementById('smallFireAudio').play();
 
       setTimeout(() => {
@@ -326,10 +324,10 @@
           explosion.src = 'assets/explosion.gif';
           explosion.style.left = darcy.style.left;
           explosion.style.top = darcy.style.top;
-          explosion.style.animation = 'explosion 0.8s ease-out forwards';
 
           document.body.appendChild(explosion);
           setTimeout(() => explosion.remove(), 800);
+
           darcy.remove();
         });
 
@@ -339,10 +337,11 @@
 
     function makeItBlue() {
       if (blueButtonUsed) return;
-      blueButtonUsed = true;
 
+      blueButtonUsed = true;
       const gif = document.getElementById('blueGif');
       const audio = document.getElementById('bigFireAudio');
+
       gif.style.display = 'block';
       audio.play();
 
@@ -379,38 +378,9 @@
     }
 
     window.addEventListener('load', () => {
-      const loadingScreen = document.getElementById('loadingScreen');
-      const assets = [
-        ...document.images,
-        document.getElementById('fireVideo'),
-        document.getElementById('smallFireAudio'),
-        document.getElementById('bigFireAudio'),
-        document.getElementById('blueGif')
-      ];
-
-      let loadedCount = 0;
-
-      const checkAllLoaded = () => {
-        loadedCount++;
-        if (loadedCount === assets.length) {
-          loadingScreen.classList.add('fade-out');
-          setTimeout(() => loadingScreen.remove(), 600);
-          animateDarcys();
-        }
-      };
-
-      assets.forEach(asset => {
-        if (
-          (asset.tagName === 'IMG' && asset.complete) ||
-          (asset.tagName === 'VIDEO' && asset.readyState >= 3) ||
-          (asset.tagName === 'AUDIO' && asset.readyState >= 3)
-        ) {
-          checkAllLoaded();
-        } else {
-          asset.addEventListener('load', checkAllLoaded);
-          asset.addEventListener('canplaythrough', checkAllLoaded);
-        }
-      });
+      document.body.classList.remove('loading');
+      document.getElementById('loadingScreen').style.display = 'none';
+      animateDarcys();
     });
   </script>
 </body>
