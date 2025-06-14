@@ -98,6 +98,7 @@
       font-family: Arial, sans-serif;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
       border: 2px solid;
+      transition: all 0.3s ease;
     }
 
     .add-button {
@@ -128,6 +129,18 @@
 
     .extra-button:hover {
       background: #7bb9d1;
+    }
+
+    .extra-button.disabled {
+      background: #999999;
+      border-color: #666666;
+      color: #333333;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .extra-button.disabled:hover {
+      background: #999999;
     }
 
     .message-button {
@@ -234,7 +247,7 @@
 
   <div class="button-container">
     <button class="explode-button" onclick="explodeAllDarcys()">Explode all Darcys</button>
-    <button class="extra-button" onclick="makeItBlue()">Make it blue</button>
+    <button class="extra-button" id="blueButton" onclick="makeItBlue()">Make it blue</button>
     <button class="extra-button message-button" id="messageButton" onclick="toggleSincereMessage()">Get a sincere message</button>
   </div>
 
@@ -249,6 +262,7 @@
       'assets/darcy6.png'
     ];
     let imageIndex = 0;
+    let blueButtonUsed = false;
 
     // Preload all assets
     function preloadAssets() {
@@ -342,6 +356,17 @@
     }
 
     function makeItBlue() {
+      // Prevent multiple clicks
+      if (blueButtonUsed) return;
+      
+      blueButtonUsed = true;
+      const blueButton = document.getElementById('blueButton');
+      
+      // Disable and change the button immediately
+      blueButton.textContent = 'oops...';
+      blueButton.classList.add('disabled');
+      blueButton.onclick = null; // Remove click handler
+      
       const gif = document.getElementById('blueGif');
       const audio = document.getElementById('bigFireAudio');
 
