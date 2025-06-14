@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="loading">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -20,40 +20,68 @@
   <link rel="preload" href="assets/bigfire.mp3" as="audio" type="audio/mpeg">
 
   <style>
-    html, body {
+    body {
       margin: 0;
       padding: 0;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    body.loading *:not(#loadingScreen) {
-      display: none !important;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
       background: white;
-      position: relative;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
       transition: background-color 0.5s ease;
     }
 
-    body.blue-theme {
-      background: blue;
-    }
-
+    /* Loading screen styles */
     #loadingScreen {
       position: fixed;
-      top: 0;
-      right: 0;
-      padding: 10px 20px;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       font-size: 1.5rem;
       font-weight: bold;
       color: black;
-      background: white;
-      z-index: 10000;
-      border-bottom-left-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 9999;
+      background: none;
+      animation: fadeIn 1s ease-in;
+    }
+
+    @keyframes loadingDots {
+      0% { content: "."; }
+      33% { content: ".."; }
+      66% { content: "..."; }
+      100% { content: ""; }
+    }
+
+    #dots::after {
+      content: "";
+      animation: dots 1s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0% { content: ""; }
+      25% { content: "."; }
+      50% { content: ".."; }
+      75% { content: "..."; }
+      100% { content: ""; }
+    }
+
+    #loadingScreen.fade-out {
+      animation: fadeOut 1s forwards;
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    #mainContent {
+      opacity: 0;
+      transition: opacity 1s ease-in;
+    }
+
+    /* Content styles (unchanged) */
+    body.blue-theme {
+      background: blue;
     }
 
     .fire-video {
@@ -124,28 +152,16 @@
       color: black;
     }
 
-    .add-button:hover {
-      background: #b5b5b5;
-    }
-
     .explode-button {
       background: #df8989;
       border-color: #4a3939;
       color: black;
     }
 
-    .explode-button:hover {
-      background: #c77b7b;
-    }
-
     .extra-button {
       background: #89c7df;
       border-color: #394a6d;
       color: black;
-    }
-
-    .extra-button:hover {
-      background: #7bb9d1;
     }
 
     .extra-button.disabled {
@@ -161,10 +177,6 @@
       border-color: #396d42;
     }
 
-    .message-button:hover {
-      background: #7bd18a;
-    }
-
     .button-container {
       position: fixed;
       bottom: 20px;
@@ -178,7 +190,6 @@
       font-size: 1.2rem;
       color: black;
       max-width: 500px;
-      line-height: 1.5;
       padding: 20px;
       position: fixed;
       left: 20px;
@@ -229,16 +240,19 @@
     }
   </style>
 </head>
-<body class="loading">
+<body>
 
-  <div id="loadingScreen">Loading…</div>
+<!-- Loading screen -->
+<div id="loadingScreen">Loading<span id="dots"></span></div>
+
+<!-- Main content -->
+<div id="mainContent">
 
   <video class="fire-video" id="fireVideo" autoplay muted loop preload="auto">
     <source src="assets/fire.mp4" type="video/mp4" />
   </video>
 
   <img id="blueGif" src="assets/makeitblue.gif" />
-
   <audio id="smallFireAudio" src="assets/smallfire.mp3" preload="auto"></audio>
   <audio id="bigFireAudio" src="assets/bigfire.mp3" preload="auto"></audio>
 
@@ -257,131 +271,107 @@
     <button class="extra-button message-button" id="messageButton" onclick="toggleSincereMessage()">Get a sincere message</button>
   </div>
 
-  <script>
-    let darcys = [];
-    const darcyImages = [
-      'assets/darcy1.png',
-      'assets/darcy2.png',
-      'assets/darcy3.png',
-      'assets/darcy4.png',
-      'assets/darcy5.png',
-      'assets/darcy6.png'
-    ];
-    let imageIndex = 0;
-    let blueButtonUsed = false;
+</div>
 
-    function addDarcy() {
-      const darcy = document.createElement('img');
-      darcy.className = 'darcy-img';
-      darcy.src = darcyImages[imageIndex % darcyImages.length];
-      imageIndex++;
+<script>
+  let darcys = [];
+  const darcyImages = [
+    'assets/darcy1.png', 'assets/darcy2.png', 'assets/darcy3.png',
+    'assets/darcy4.png', 'assets/darcy5.png', 'assets/darcy6.png'
+  ];
+  let imageIndex = 0;
+  let blueButtonUsed = false;
 
-      darcy.style.left = Math.random() * (window.innerWidth - 200) + 'px';
-      darcy.style.top = Math.random() * (window.innerHeight - 200) + 'px';
+  function addDarcy() {
+    const darcy = document.createElement('img');
+    darcy.className = 'darcy-img';
+    darcy.src = darcyImages[imageIndex++ % darcyImages.length];
+    darcy.style.left = Math.random() * (window.innerWidth - 200) + 'px';
+    darcy.style.top = Math.random() * (window.innerHeight - 200) + 'px';
+    darcy.velocityX = (Math.random() - 0.5) * 8;
+    darcy.velocityY = (Math.random() - 0.5) * 8;
+    if (Math.abs(darcy.velocityX) < 2) darcy.velocityX = darcy.velocityX > 0 ? 2 : -2;
+    if (Math.abs(darcy.velocityY) < 2) darcy.velocityY = darcy.velocityY > 0 ? 2 : -2;
+    document.body.appendChild(darcy);
+    darcys.push(darcy);
+  }
 
-      darcy.velocityX = (Math.random() - 0.5) * 8;
-      darcy.velocityY = (Math.random() - 0.5) * 8;
-
-      if (Math.abs(darcy.velocityX) < 2) darcy.velocityX = darcy.velocityX > 0 ? 2 : -2;
-      if (Math.abs(darcy.velocityY) < 2) darcy.velocityY = darcy.velocityY > 0 ? 2 : -2;
-
-      document.body.appendChild(darcy);
-      darcys.push(darcy);
-    }
-
-    function animateDarcys() {
-      darcys.forEach(darcy => {
-        const rect = darcy.getBoundingClientRect();
-        let newLeft = rect.left + darcy.velocityX;
-        let newTop = rect.top + darcy.velocityY;
-
-        if (newLeft <= 0 || newLeft >= window.innerWidth - 200) {
-          darcy.velocityX = -darcy.velocityX;
-          newLeft = newLeft <= 0 ? 0 : window.innerWidth - 200;
-        }
-
-        if (newTop <= 0 || newTop >= window.innerHeight - 200) {
-          darcy.velocityY = -darcy.velocityY;
-          newTop = newTop <= 0 ? 0 : window.innerHeight - 200;
-        }
-
-        darcy.style.left = newLeft + 'px';
-        darcy.style.top = newTop + 'px';
-      });
-
-      requestAnimationFrame(animateDarcys);
-    }
-
-    function explodeAllDarcys() {
-      if (darcys.length === 0) return;
-
-      document.getElementById('smallFireAudio').play();
-
-      setTimeout(() => {
-        darcys.forEach(darcy => {
-          const explosion = document.createElement('img');
-          explosion.className = 'explosion';
-          explosion.src = 'assets/explosion.gif';
-          explosion.style.left = darcy.style.left;
-          explosion.style.top = darcy.style.top;
-
-          document.body.appendChild(explosion);
-          setTimeout(() => explosion.remove(), 800);
-
-          darcy.remove();
-        });
-
-        darcys = [];
-      }, 500);
-    }
-
-    function makeItBlue() {
-      if (blueButtonUsed) return;
-
-      blueButtonUsed = true;
-      const gif = document.getElementById('blueGif');
-      const audio = document.getElementById('bigFireAudio');
-
-      gif.style.display = 'block';
-      audio.play();
-
-      setTimeout(() => {
-        document.getElementById('blueButton').textContent = 'oops...';
-        document.getElementById('blueButton').classList.add('disabled');
-        document.getElementById('blueButton').onclick = null;
-
-        explodeAllDarcys();
-        document.body.classList.add('blue-theme');
-        document.querySelector('.title').classList.add('white-text');
-        document.getElementById('sincereMessage').classList.add('white-text');
-        document.getElementById('fireVideo').classList.add('show');
-      }, 500);
-
-      setTimeout(() => {
-        gif.style.display = 'none';
-      }, 2500);
-    }
-
-    function toggleSincereMessage() {
-      const message = document.getElementById('sincereMessage');
-      const button = document.getElementById('messageButton');
-
-      if (message.classList.contains('show')) {
-        message.classList.remove('show');
-        message.classList.add('hide');
-        button.textContent = 'Get a sincere message';
-      } else {
-        message.classList.remove('hide');
-        message.classList.add('show');
-        button.textContent = 'Hide a sincere message';
-      }
-    }
-
-    window.addEventListener('load', () => {
-      document.body.classList.remove('loading');
-      document.getElementById('loadingScreen').style.display = 'none';
-      animateDarcys();
+  function animateDarcys() {
+    darcys.forEach(d => {
+      const rect = d.getBoundingClientRect();
+      let newLeft = rect.left + d.velocityX;
+      let newTop = rect.top + d.velocityY;
+      if (newLeft <= 0 || newLeft >= window.innerWidth - 200) d.velocityX *= -1;
+      if (newTop <= 0 || newTop >= window.innerHeight - 200) d.velocityY *= -1;
+      d.style.left = Math.max(0, Math.min(newLeft, window.innerWidth - 200)) + 'px';
+      d.style.top = Math.max(0, Math.min(newTop, window.innerHeight - 200)) + 'px';
     });
-  </script>
+    requestAnimationFrame(animateDarcys);
+  }
+
+  function explodeAllDarcys() {
+    if (darcys.length === 0) return;
+    document.getElementById('smallFireAudio').play();
+    setTimeout(() => {
+      darcys.forEach(d => {
+        const explosion = document.createElement('img');
+        explosion.className = 'explosion';
+        explosion.src = 'assets/explosion.gif';
+        explosion.style.left = d.style.left;
+        explosion.style.top = d.style.top;
+        document.body.appendChild(explosion);
+        setTimeout(() => explosion.remove(), 800);
+        d.remove();
+      });
+      darcys = [];
+    }, 500);
+  }
+
+  function makeItBlue() {
+    if (blueButtonUsed) return;
+    blueButtonUsed = true;
+    const gif = document.getElementById('blueGif');
+    const audio = document.getElementById('bigFireAudio');
+    gif.style.display = 'block';
+    audio.play();
+    setTimeout(() => {
+      document.getElementById('blueButton').textContent = 'oops...';
+      document.getElementById('blueButton').classList.add('disabled');
+      document.getElementById('blueButton').onclick = null;
+      explodeAllDarcys();
+      document.body.classList.add('blue-theme');
+      document.querySelector('.title').classList.add('white-text');
+      document.getElementById('sincereMessage').classList.add('white-text');
+      document.getElementById('fireVideo').classList.add('show');
+    }, 500);
+    setTimeout(() => gif.style.display = 'none', 2500);
+  }
+
+  function toggleSincereMessage() {
+    const msg = document.getElementById('sincereMessage');
+    const btn = document.getElementById('messageButton');
+    if (msg.classList.contains('show')) {
+      msg.classList.remove('show');
+      msg.classList.add('hide');
+      btn.textContent = 'Get a sincere message';
+    } else {
+      msg.classList.remove('hide');
+      msg.classList.add('show');
+      btn.textContent = 'Hide a sincere message';
+    }
+  }
+
+  window.addEventListener('load', () => {
+    const loadingScreen = document.getElementById('loadingScreen');
+    const mainContent = document.getElementById('mainContent');
+    loadingScreen.classList.add('fade-out');
+    setTimeout(() => {
+      loadingScreen.style.display = 'none';
+      mainContent.style.opacity = 1;
+      document.body.classList.remove('loading');
+      animateDarcys();
+    }, 1000);
+  });
+</script>
 </body>
 </html>
