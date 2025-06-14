@@ -208,26 +208,11 @@
       100% { transform: scale(1.5); opacity: 0; }
     }
 
-    /* Loading indicator */
-    .loading {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 1.5rem;
-      color: #666;
-      z-index: 1000;
-    }
 
-    .loading.hidden {
-      display: none;
-    }
   </style>
 </head>
 <body>
-  <div class="loading" id="loadingIndicator">Loading assets...</div>
-
-  <video class="fire-video" id="fireVideo" autoplay muted loop preload="auto">
+<video class="fire-video" id="fireVideo" autoplay muted loop preload="auto">
     <source src="assets/fire.mp4" type="video/mp4" />
     Your browser does not support the video tag.
   </video>
@@ -262,9 +247,8 @@
       'assets/darcy5.png'
     ];
     let imageIndex = 0;
-    let assetsLoaded = false;
 
-    // Preload all assets and track loading
+    // Preload all assets
     function preloadAssets() {
       const assets = [
         ...darcyImages,
@@ -272,25 +256,8 @@
         'assets/makeitblue.gif'
       ];
       
-      let loadedCount = 0;
-      const totalAssets = assets.length;
-
       assets.forEach(src => {
         const img = new Image();
-        img.onload = () => {
-          loadedCount++;
-          if (loadedCount === totalAssets) {
-            assetsLoaded = true;
-            document.getElementById('loadingIndicator').classList.add('hidden');
-          }
-        };
-        img.onerror = () => {
-          loadedCount++;
-          if (loadedCount === totalAssets) {
-            assetsLoaded = true;
-            document.getElementById('loadingIndicator').classList.add('hidden');
-          }
-        };
         img.src = src;
       });
     }
