@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Happy Birthday Darcy!</title>
   <link rel="icon" type="image/png" href="assets/darcy4.png">
+  
+  <!-- Preload all images -->
+  <link rel="preload" href="assets/darcy1.png" as="image">
+  <link rel="preload" href="assets/darcy2.png" as="image">
+  <link rel="preload" href="assets/darcy3.png" as="image">
+  <link rel="preload" href="assets/darcy4.png" as="image">
+  <link rel="preload" href="assets/darcy5.png" as="image">
+  <link rel="preload" href="assets/explosion.gif" as="image">
+  <link rel="preload" href="assets/makeitblue.gif" as="image">
+  
+  <!-- Preload video -->
+  <link rel="preload" href="assets/fire.mp4" as="video" type="video/mp4">
+  
+  <!-- Preload audio -->
+  <link rel="preload" href="assets/smallfire.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="assets/bigfire.mp3" as="audio" type="audio/mpeg">
+  
   <style>
     body {
       margin: 0;
@@ -190,10 +207,27 @@
       50% { transform: scale(1.2); opacity: 1; }
       100% { transform: scale(1.5); opacity: 0; }
     }
+
+    /* Loading indicator */
+    .loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+      color: #666;
+      z-index: 1000;
+    }
+
+    .loading.hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <video class="fire-video" id="fireVideo" autoplay muted loop>
+  <div class="loading" id="loadingIndicator">Loading assets...</div>
+
+  <video class="fire-video" id="fireVideo" autoplay muted loop preload="auto">
     <source src="assets/fire.mp4" type="video/mp4" />
     Your browser does not support the video tag.
   </video>
@@ -228,6 +262,38 @@
       'assets/darcy5.png'
     ];
     let imageIndex = 0;
+    let assetsLoaded = false;
+
+    // Preload all assets and track loading
+    function preloadAssets() {
+      const assets = [
+        ...darcyImages,
+        'assets/explosion.gif',
+        'assets/makeitblue.gif'
+      ];
+      
+      let loadedCount = 0;
+      const totalAssets = assets.length;
+
+      assets.forEach(src => {
+        const img = new Image();
+        img.onload = () => {
+          loadedCount++;
+          if (loadedCount === totalAssets) {
+            assetsLoaded = true;
+            document.getElementById('loadingIndicator').classList.add('hidden');
+          }
+        };
+        img.onerror = () => {
+          loadedCount++;
+          if (loadedCount === totalAssets) {
+            assetsLoaded = true;
+            document.getElementById('loadingIndicator').classList.add('hidden');
+          }
+        };
+        img.src = src;
+      });
+    }
 
     function addDarcy() {
       const darcy = document.createElement('img');
@@ -274,9 +340,9 @@
     }
 
     function explodeAllDarcys() {
-        if (darcys.length === 0) return;
+      if (darcys.length === 0) return;
       
-        const audio = document.getElementById('smallFireAudio');
+      const audio = document.getElementById('smallFireAudio');
       audio.volume = 1.0;
       audio.play();
 
@@ -307,29 +373,28 @@
     }
 
     function makeItBlue() {
-        const gif = document.getElementById('blueGif');
-        const audio = document.getElementById('bigFireAudio');
+      const gif = document.getElementById('blueGif');
+      const audio = document.getElementById('bigFireAudio');
 
-        // Show GIF and start audio immediately
-        gif.style.display = 'block';
-        audio.volume = 1.0;
-        audio.play();
+      // Show GIF and start audio immediately
+      gif.style.display = 'block';
+      audio.volume = 1.0;
+      audio.play();
 
-        // Wait 0.5s before doing the rest
-        setTimeout(() => {
-            explodeAllDarcys();
-            document.body.classList.add('blue-theme');
-            document.querySelector('.title').classList.add('white-text');
-            document.getElementById('sincereMessage').classList.add('white-text');
-            document.getElementById('fireVideo').classList.add('show');
-        }, 500);
+      // Wait 0.5s before doing the rest
+      setTimeout(() => {
+        explodeAllDarcys();
+        document.body.classList.add('blue-theme');
+        document.querySelector('.title').classList.add('white-text');
+        document.getElementById('sincereMessage').classList.add('white-text');
+        document.getElementById('fireVideo').classList.add('show');
+      }, 500);
 
-        // Hide the GIF after it's finished (adjust timing to match actual GIF duration)
-        setTimeout(() => {
-            gif.style.display = 'none';
-        }, 2500);
-        }
-
+      // Hide the GIF after it's finished (adjust timing to match actual GIF duration)
+      setTimeout(() => {
+        gif.style.display = 'none';
+      }, 2500);
+    }
 
     function toggleSincereMessage() {
       const message = document.getElementById('sincereMessage');
@@ -346,7 +411,11 @@
       }
     }
 
-    animateDarcys();
+    // Initialize everything
+    window.addEventListener('load', () => {
+      preloadAssets();
+      animateDarcys();
+    });
   </script>
 </body>
 </html>
