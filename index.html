@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Happy Birthday Darcy!</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: white;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+      position: relative;
+      transition: background-color 0.5s ease;
+    }
+
+    body.blue-theme {
+      background: blue;
+    }
+
+    .fire-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .fire-video.show {
+      opacity: 1;
+    }
+
+    #blueGif {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 999;
+      display: none;
+      pointer-events: none;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      position: relative;
+      z-index: 10;
+    }
+
+    .title {
+      font-size: 4rem;
+      font-weight: bold;
+      color: black;
+      margin-bottom: 30px;
+      text-align: center;
+      transition: color 0.5s ease;
+    }
+
+    .title.white-text {
+      color: white;
+    }
+
+    .add-button, .explode-button, .extra-button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: Arial, sans-serif;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+      border: 2px solid;
+    }
+
+    .add-button {
+      background: #c0c0c0;
+      border-color: #6d6d6d;
+      color: black;
+    }
+
+    .add-button:hover {
+      background: #b5b5b5;
+    }
+
+    .explode-button {
+      background: #df8989;
+      border-color: #4a3939;
+      color: black;
+    }
+
+    .explode-button:hover {
+      background: #c77b7b;
+    }
+
+    .extra-button {
+      background: #89c7df;
+      border-color: #394a6d;
+      color: black;
+    }
+
+    .extra-button:hover {
+      background: #7bb9d1;
+    }
+
+    .message-button {
+      background: #89df98;
+      border-color: #396d42;
+    }
+
+    .message-button:hover {
+      background: #7bd18a;
+    }
+
+    .button-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .sincere-message {
+      font-size: 1.2rem;
+      color: black;
+      text-align: left;
+      max-width: 500px;
+      line-height: 1.5;
+      padding: 20px;
+      position: fixed;
+      left: 20px;
+      top: -200px;
+      z-index: 15;
+      opacity: 0;
+      pointer-events: none;
+      transition: color 0.5s ease;
+    }
+
+    .sincere-message.white-text {
+      color: white;
+    }
+
+    .sincere-message.show {
+      animation: slideDown 0.6s forwards;
+      pointer-events: auto;
+    }
+
+    .sincere-message.hide {
+      animation: slideUp 0.6s forwards;
+      pointer-events: none;
+    }
+
+    @keyframes slideDown {
+      0% { top: -200px; opacity: 0; }
+      100% { top: 20px; opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      0% { top: 20px; opacity: 1; }
+      100% { top: -200px; opacity: 0; }
+    }
+
+    .darcy-img {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      z-index: 5;
+    }
+
+    .explosion {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    @keyframes explosion {
+      0% { transform: scale(0); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <video class="fire-video" id="fireVideo" autoplay muted loop>
+    <source src="assets/fire.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+
+  <img id="blueGif" src="assets/makeitblue.gif" />
+
+  <audio id="smallFireAudio" src="assets/smallfire.mp3" preload="auto"></audio>
+  <audio id="bigFireAudio" src="assets/bigfire.mp3" preload="auto"></audio>
+
+  <div class="container">
+    <h1 class="title">HAPPY BIRTHDAY DARCY!</h1>
+    <button class="add-button" onclick="addDarcy()">Add more Darcys</button>
+  </div>
+
+  <div class="sincere-message" id="sincereMessage">
+    Thank you Darcy for literally being the kindest, funnest, most open and sharing person at 7. You never turn me away when I randomly come to sit with you and it means a lot. You've probably realised by now but I really look up to you, and if I can be half the manager and media operations pro you are then I'll have done well. Lucy.
+  </div>
+
+  <div class="button-container">
+    <button class="explode-button" onclick="explodeAllDarcys()">Explode all Darcys</button>
+    <button class="extra-button" onclick="makeItBlue()">Make it blue</button>
+    <button class="extra-button message-button" id="messageButton" onclick="toggleSincereMessage()">Get a sincere message</button>
+  </div>
+
+  <script>
+    let darcys = [];
+    const darcyImages = [
+      'assets/darcy1.png',
+      'assets/darcy2.png',
+      'assets/darcy3.png',
+      'assets/darcy4.png',
+      'assets/darcy5.png'
+    ];
+    let imageIndex = 0;
+
+    function addDarcy() {
+      const darcy = document.createElement('img');
+      darcy.className = 'darcy-img';
+      darcy.src = darcyImages[imageIndex % darcyImages.length];
+      imageIndex++;
+
+      darcy.style.left = Math.random() * (window.innerWidth - 200) + 'px';
+      darcy.style.top = Math.random() * (window.innerHeight - 200) + 'px';
+
+      darcy.velocityX = (Math.random() - 0.5) * 8;
+      darcy.velocityY = (Math.random() - 0.5) * 8;
+
+      if (Math.abs(darcy.velocityX) < 2) darcy.velocityX = darcy.velocityX > 0 ? 2 : -2;
+      if (Math.abs(darcy.velocityY) < 2) darcy.velocityY = darcy.velocityY > 0 ? 2 : -2;
+
+      document.body.appendChild(darcy);
+      darcys.push(darcy);
+    }
+
+    function animateDarcys() {
+      darcys.forEach(darcy => {
+        if (!darcy.parentNode) return;
+
+        const rect = darcy.getBoundingClientRect();
+        let newLeft = rect.left + darcy.velocityX;
+        let newTop = rect.top + darcy.velocityY;
+
+        if (newLeft <= 0 || newLeft >= window.innerWidth - 200) {
+          darcy.velocityX = -darcy.velocityX;
+          newLeft = Math.max(0, Math.min(window.innerWidth - 200, newLeft));
+        }
+
+        if (newTop <= 0 || newTop >= window.innerHeight - 200) {
+          darcy.velocityY = -darcy.velocityY;
+          newTop = Math.max(0, Math.min(window.innerHeight - 200, newTop));
+        }
+
+        darcy.style.left = newLeft + 'px';
+        darcy.style.top = newTop + 'px';
+      });
+
+      requestAnimationFrame(animateDarcys);
+    }
+
+    function explodeAllDarcys() {
+        if (darcys.length === 0) return;
+      
+        const audio = document.getElementById('smallFireAudio');
+      audio.volume = 1.0;
+      audio.play();
+
+      setTimeout(() => {
+        darcys.forEach(darcy => {
+          if (!darcy.parentNode) return;
+
+          const explosion = document.createElement('img');
+          explosion.className = 'explosion';
+          explosion.src = 'assets/explosion.gif';
+          explosion.style.left = darcy.style.left;
+          explosion.style.top = darcy.style.top;
+          explosion.style.animation = 'explosion 0.8s ease-out forwards';
+
+          document.body.appendChild(explosion);
+
+          setTimeout(() => {
+            if (explosion.parentNode) {
+              explosion.parentNode.removeChild(explosion);
+            }
+          }, 800);
+
+          darcy.parentNode.removeChild(darcy);
+        });
+
+        darcys = [];
+      }, 500);
+    }
+
+    function makeItBlue() {
+        const gif = document.getElementById('blueGif');
+        const audio = document.getElementById('bigFireAudio');
+
+        // Show GIF and start audio immediately
+        gif.style.display = 'block';
+        audio.volume = 1.0;
+        audio.play();
+
+        // Wait 0.5s before doing the rest
+        setTimeout(() => {
+            explodeAllDarcys();
+            document.body.classList.add('blue-theme');
+            document.querySelector('.title').classList.add('white-text');
+            document.getElementById('sincereMessage').classList.add('white-text');
+            document.getElementById('fireVideo').classList.add('show');
+        }, 500);
+
+        // Hide the GIF after it's finished (adjust timing to match actual GIF duration)
+        setTimeout(() => {
+            gif.style.display = 'none';
+        }, 2500);
+        }
+
+
+    function toggleSincereMessage() {
+      const message = document.getElementById('sincereMessage');
+      const button = document.getElementById('messageButton');
+
+      if (message.classList.contains('show')) {
+        message.classList.remove('show');
+        message.classList.add('hide');
+        button.textContent = 'Get a sincere message';
+      } else {
+        message.classList.remove('hide');
+        message.classList.add('show');
+        button.textContent = 'Hide a sincere message';
+      }
+    }
+
+    animateDarcys();
+  </script>
+</body>
+</html>
