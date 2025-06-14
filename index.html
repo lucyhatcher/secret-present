@@ -215,14 +215,6 @@
       z-index: 20;
       pointer-events: none;
     }
-
-    @keyframes explosion {
-      0% { transform: scale(0); opacity: 1; }
-      50% { transform: scale(1.2); opacity: 1; }
-      100% { transform: scale(1.5); opacity: 0; }
-    }
-
-
   </style>
 </head>
 <body>
@@ -264,20 +256,6 @@
     let imageIndex = 0;
     let blueButtonUsed = false;
 
-    // Preload all assets
-    function preloadAssets() {
-      const assets = [
-        ...darcyImages,
-        'assets/explosion.gif',
-        'assets/makeitblue.gif'
-      ];
-      
-      assets.forEach(src => {
-        const img = new Image();
-        img.src = src;
-      });
-    }
-
     function addDarcy() {
       const darcy = document.createElement('img');
       darcy.className = 'darcy-img';
@@ -299,20 +277,18 @@
 
     function animateDarcys() {
       darcys.forEach(darcy => {
-        if (!darcy.parentNode) return;
-
         const rect = darcy.getBoundingClientRect();
         let newLeft = rect.left + darcy.velocityX;
         let newTop = rect.top + darcy.velocityY;
 
         if (newLeft <= 0 || newLeft >= window.innerWidth - 200) {
           darcy.velocityX = -darcy.velocityX;
-          newLeft = Math.max(0, Math.min(window.innerWidth - 200, newLeft));
+          newLeft = newLeft <= 0 ? 0 : window.innerWidth - 200;
         }
 
         if (newTop <= 0 || newTop >= window.innerHeight - 200) {
           darcy.velocityY = -darcy.velocityY;
-          newTop = Math.max(0, Math.min(window.innerHeight - 200, newTop));
+          newTop = newTop <= 0 ? 0 : window.innerHeight - 200;
         }
 
         darcy.style.left = newLeft + 'px';
@@ -326,13 +302,10 @@
       if (darcys.length === 0) return;
       
       const audio = document.getElementById('smallFireAudio');
-      audio.volume = 1.0;
       audio.play();
 
       setTimeout(() => {
         darcys.forEach(darcy => {
-          if (!darcy.parentNode) return;
-
           const explosion = document.createElement('img');
           explosion.className = 'explosion';
           explosion.src = 'assets/explosion.gif';
@@ -356,35 +329,37 @@
     }
 
     function makeItBlue() {
-      // Prevent multiple clicks
       if (blueButtonUsed) return;
       
       blueButtonUsed = true;
       const blueButton = document.getElementById('blueButton');
-      
       const gif = document.getElementById('blueGif');
       const audio = document.getElementById('bigFireAudio');
 
       // Show GIF and start audio immediately
       gif.style.display = 'block';
-      audio.volume = 1.0;
       audio.play();
 
       // Wait 0.5s before changing button and doing the rest
       setTimeout(() => {
-        // Change button to "oops..." and disable it
         blueButton.textContent = 'oops...';
         blueButton.classList.add('disabled');
-        blueButton.onclick = null; // Remove click handler
+        blueButton.onclick = null;
         
         explodeAllDarcys();
+        
+        // Apply theme changes
         document.body.classList.add('blue-theme');
-        document.querySelector('.title').classList.add('white-text');
-        document.getElementById('sincereMessage').classList.add('white-text');
+        const elementsToMakeWhite = [
+          document.querySelector('.title'),
+          document.getElementById('sincereMessage')
+        ];
+        elementsToMakeWhite.forEach(el => el.classList.add('white-text'));
+        
         document.getElementById('fireVideo').classList.add('show');
       }, 500);
 
-      // Hide the GIF after it's finished (adjust timing to match actual GIF duration)
+      // Hide the GIF after it's finished
       setTimeout(() => {
         gif.style.display = 'none';
       }, 2500);
@@ -405,9 +380,8 @@
       }
     }
 
-    // Initialize everything
+    // Initialize animation on load
     window.addEventListener('load', () => {
-      preloadAssets();
       animateDarcys();
     });
   </script>
